@@ -15,5 +15,5 @@ export class Callback {
   accountId: number;
 
   @Column()
-  authToken: string;
+  callbackToken: string;
 }

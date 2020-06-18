@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppController } from './controllers/app.controller';
-import { AppService } from './services/app.service';
+import { CallbackController } from './controllers/callback.controller';
+import { CallbackService } from './services/callback.service';
 
 // entities
 import { Notification } from './entities/notification.entity'
@@ -18,12 +18,20 @@ import { Payload } from './entities/payload.entity'
       username: 'notificationapp',
       password: 'password',
       database: 'xendit',
-      entities: [ Notification, Callback, Payload ],
+      entities: [
+        Notification,
+        Callback,
+        Payload
+      ],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([ Notification ])
+    TypeOrmModule.forFeature([
+      Notification,
+      Callback,
+      Payload
+    ])
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [CallbackController],
+  providers: [CallbackService],
 })
 export class AppModule {}
