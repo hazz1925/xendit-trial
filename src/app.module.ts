@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppController } from './controllers/app.controller';
+import { AppService } from './services/app.service';
 
 // entities
 import { Notification } from './entities/notification.entity'
