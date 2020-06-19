@@ -9,15 +9,19 @@ import { Repository } from 'typeorm'
 import { Notification } from '../entities/notification.entity'
 import { Callback } from '../entities/callback.entity'
 import { NotifyDto } from '../dtos/notify.dto'
+import { SqsService } from './sqs.service';
 
 @Injectable()
 export class NotificationService {
   public static readonly PENDING = 'PENDING'
   public static readonly ACKNOWLEDGED = 'ACKNOWLEDGED'
 
+  private static readonly FIFTEEN_MINS = 1000
+
   constructor(
     @InjectRepository(Callback) private callbackRepository: Repository<Callback>,
     @InjectRepository(Notification) private notificationRepository: Repository<Notification>,
+    private readonly sqsService: SqsService
   ) {}
 
   async createAndSendNotification(notifyDto: NotifyDto): Promise<void> {
@@ -34,13 +38,15 @@ export class NotificationService {
         payload: JSON.stringify(notifyDto.payload)
       })
 
-      const sent = this.sendNotification(
+      const sent = await this.sendNotification(
         callback.callbackUrl,
         notifyDto.payload,
         callback.callbackToken
       )
       if (sent) {
         this.updateNotificationStatus(notification.id, NotificationService.ACKNOWLEDGED)
+      } else {
+        this.pushToRetryQueue(notification.id)
       }
     } catch(error) {
       throw new InternalServerErrorException(error.message)
@@ -51,14 +57,26 @@ export class NotificationService {
     callbackUrl: string,
     payload: object,
     callbackToken: string
-  ) {
-    const res = await axios.post(callbackUrl, payload, {
-      headers: {
-        'X-Callback-Token': callbackToken
-      },
-      timeout: 2000
-    })
-    return res.status === 200
+  ): Promise<boolean> {
+    try {
+      const res = await axios.post(callbackUrl, payload, {
+        headers: {
+          'X-Callback-Token': callbackToken
+        },
+        timeout: 2000
+      })
+      return res.status === 200
+    } catch(error) {
+      return false
+    }
+  }
+
+  private pushToRetryQueue(notificationId) {
+    setTimeout(() => {
+      this.sqsService.sendMessage({
+        notificationId
+      })
+    }, NotificationService.FIFTEEN_MINS)
   }
 
   async updateNotificationStatus(id: number, status: string) {

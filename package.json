@@ -19,13 +19,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "build:db": "docker run --name xendit-postgres -p 5432:5432 -e POSTGRES_USER=notificationapp -e POSTGRES_PASSWORD=password -e POSTGRES_DB=xendit -d postgres"
+    "build:db": "docker run --name xendit-postgres -p 5432:5432 -e POSTGRES_USER=notificationapp -e POSTGRES_PASSWORD=password -e POSTGRES_DB=xendit -d postgres",
+    "build:sqs": "docker run --name xendit-sqs -p 9324:9324 -p 9325:9325 -d roribio16/alpine-sqs:latest"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
     "@nestjs/core": "^7.0.0",
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/typeorm": "^7.1.0",
+    "aws-sdk": "^2.699.0",
     "axios": "^0.19.2",
     "pg": "^8.2.1",
     "reflect-metadata": "^0.1.13",
