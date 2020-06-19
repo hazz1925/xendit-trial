@@ -2,13 +2,11 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  Unique,
   CreateDateColumn,
   UpdateDateColumn
 } from 'typeorm';
 
 @Entity()
-@Unique(['paymentId'])
 export class Notification {
   @PrimaryGeneratedColumn()
   id: number;

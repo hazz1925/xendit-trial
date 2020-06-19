@@ -28,11 +28,28 @@ export class SqsService {
   }
 
   async receiveMessage() {
-    return this.sqs.receiveMessage({
-      QueueUrl: this.queueUrl,
-      MaxNumberOfMessages: 10,
-      WaitTimeSeconds: 5,
-      VisibilityTimeout: 300
-    }).promise()
+    try {
+      return this.sqs.receiveMessage({
+        QueueUrl: this.queueUrl,
+        MaxNumberOfMessages: 5,
+        WaitTimeSeconds: 20,
+        VisibilityTimeout: 120
+      }).promise()
+    } catch(error) {
+      console.error(error)
+      throw new Error('Receiving message from SQS failed.')
+    }
+  }
+
+  async deleteMessage(receiptHandle: string) {
+    try {
+      return this.sqs.deleteMessage({
+        QueueUrl: this.queueUrl,
+        ReceiptHandle: receiptHandle
+      }).promise()
+    } catch(error) {
+      console.error(error)
+      throw new Error('Deleting message from SQS failed.')
+    }
   }
 }

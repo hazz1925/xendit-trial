@@ -16,20 +16,24 @@ export class IngestorService {
     private readonly notificationService: NotificationService,
   ) {
     console.log('starting ingestor')
-    this.process()
+    setInterval(() => {
+      this.process()
+    }, 15000)
   }
 
   async process() {
     const res = await this.sqsService.receiveMessage()
-    res.Messages?.forEach((message) => {
-      const body = JSON.parse(message.Body)
-      console.log(body)
-      this.handleMessage(body)
-    })
+    res.Messages?.forEach(this.handleMessage.bind(this))
   }
 
-  handleMessage(message: Message) {
-    this.notificationService
-      .retrySendNotification(message.notificationId)
+  async handleMessage(message) {
+    const body = JSON.parse(message.Body)
+    console.log('processing message', body)
+    const success = await this.notificationService
+      .retrySendNotification(body.notificationId)
+
+    if (success) {
+      await this.sqsService.deleteMessage(message.ReceiptHandle)
+    }
   }
 }
