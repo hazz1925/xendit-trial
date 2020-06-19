@@ -56,6 +56,17 @@ export class WebhookService {
     }
   }
 
+  async regenerateToken(id): Promise<string> {
+    try {
+      const webhook = await this.webhookRepository.findOne(id)
+      const token = this.generateToken()
+      await this.webhookRepository.update(id, { token })
+      return token
+    } catch(error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
   private generateToken(): string {
     return uuid.v4()
   }

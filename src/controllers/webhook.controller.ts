@@ -24,6 +24,15 @@ export class WebhookController {
     }
   }
 
+  @Get('token/new/:webhookId')
+  async regenerate(@Param() params): Promise<CreateResponse> {
+    const newToken = await this.webhookService.regenerateToken(params.webhookId);
+    return {
+      webhookId: params.webhookId,
+      webhookToken: newToken
+    }
+  }
+
   @Get('test/:webhookId')
   async test(@Param() params): Promise<Response> {
     const success = await this.webhookService.testWebhook(params.webhookId)
