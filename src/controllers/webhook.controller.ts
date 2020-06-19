@@ -23,9 +23,27 @@ export class WebhookController {
       webhookToken: webhook.token
     }
   }
+
+  @Get('test/:webhookId')
+  async test(@Param() params): Promise<Response> {
+    const success = await this.webhookService.testWebhook(params.webhookId)
+    if (success) {
+      return {
+        message: 'Success'
+      }
+    } else {
+      return {
+        message: 'Fail'
+      }
+    }
+  }
 }
 
 interface CreateResponse {
   webhookId: number
   webhookToken: string
+}
+
+interface Response {
+  message: string
 }

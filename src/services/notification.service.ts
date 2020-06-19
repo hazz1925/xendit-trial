@@ -78,15 +78,10 @@ export class NotificationService {
     webhook: Webhook
   ): Promise<void> {
     try {
-      const res = await axios.post(
+      const res = await this.callUrl(
         webhook.url,
         JSON.parse(notification.payload),
-        {
-          headers: {
-            'X-Callback-Token': webhook.token
-          },
-          timeout: 2000
-        }
+        webhook.token
       )
 
       if (res.status === 200) {
@@ -99,6 +94,19 @@ export class NotificationService {
     } catch(error) {
       this.pushToRetryQueue(notification.id)
     }
+  }
+
+  async callUrl(url: string, payload: object, token: string) {
+    return axios.post(
+      url,
+      payload,
+      {
+        headers: {
+          'X-Callback-Token': token
+        },
+        timeout: 2000
+      }
+    )
   }
 
   private pushToRetryQueue(notificationId) {
