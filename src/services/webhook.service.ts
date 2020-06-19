@@ -15,14 +15,21 @@ export class WebhookService {
     @InjectRepository(Webhook) private webhookRepository: Repository<Webhook>,
   ) {}
 
-  async createWebhook(webhookDto: WebhookDto): Promise<string> {
+  async createWebhook(webhookDto: WebhookDto): Promise<Webhook> {
     try {
       const token = this.generateToken()
-      await this.webhookRepository.save({
+      return this.webhookRepository.save({
         ...webhookDto,
         token
       })
-      return token
+    } catch(error) {
+      throw new InternalServerErrorException(error.message)
+    }
+  }
+
+  async get(id): Promise<Webhook> {
+    try {
+      return this.webhookRepository.findOne(id)
     } catch(error) {
       throw new InternalServerErrorException(error.message)
     }

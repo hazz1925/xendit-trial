@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { WebhookService } from '../services/webhook.service';
 import { WebhookDto } from '../dtos/webhook.dto'
 
@@ -8,13 +8,24 @@ export class WebhookController {
 
   @Post('new')
   async create(@Body() webhookDto: WebhookDto): Promise<CreateResponse> {
-    const callbackToken = await this.webhookService.createWebhook(webhookDto);
+    const webhook = await this.webhookService.createWebhook(webhookDto);
     return {
-      callbackToken
+      webhookId: webhook.id,
+      webhookToken: webhook.token
+    }
+  }
+
+  @Get('token/:webhookId')
+  async retrieve(@Param() params): Promise<CreateResponse> {
+    const webhook = await this.webhookService.get(params.webhookId);
+    return {
+      webhookId: webhook.id,
+      webhookToken: webhook.token
     }
   }
 }
 
 interface CreateResponse {
-  callbackToken: string
+  webhookId: number
+  webhookToken: string
 }
