@@ -21,7 +21,7 @@ export class IngestorService {
 
   async process() {
     const res = await this.sqsService.receiveMessage()
-    res.Messages.forEach((message) => {
+    res.Messages?.forEach((message) => {
       const body = JSON.parse(message.Body)
       console.log(body)
       this.handleMessage(body)

@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
 import { Notification } from '../entities/notification.entity'
-import { Callback } from '../entities/callback.entity'
+import { Webhook } from '../entities/webhook.entity'
 import { NotifyDto } from '../dtos/notify.dto'
 import { SqsService } from './sqs.service';
 
@@ -19,19 +19,19 @@ export class NotificationService {
   private static readonly FIFTEEN_MINS = 1000
 
   constructor(
-    @InjectRepository(Callback) private callbackRepository: Repository<Callback>,
+    @InjectRepository(Webhook) private webhookRepository: Repository<Webhook>,
     @InjectRepository(Notification) private notificationRepository: Repository<Notification>,
     private readonly sqsService: SqsService
   ) {}
 
   async createAndSendNotification(notifyDto: NotifyDto): Promise<void> {
     try {
-      const callback = await this.callbackRepository.findOne({
+      const webhook = await this.webhookRepository.findOne({
         accountId: notifyDto.accountId,
         type: notifyDto.type
       })
       const notification = await this.notificationRepository.save({
-        callbackId: callback.id,
+        webhookId: webhook.id,
         paymentId: notifyDto.paymentId,
         tries: 1,
         status: NotificationService.PENDING,
@@ -40,7 +40,7 @@ export class NotificationService {
 
       const sent = await this.sendNotification(
         notification,
-        callback
+        webhook
       )
     } catch(error) {
       throw new InternalServerErrorException(error.message)
@@ -49,15 +49,15 @@ export class NotificationService {
 
   private async sendNotification(
     notification: Notification,
-    callback: Callback
+    webhook: Webhook
   ) {
     try {
       const res = await axios.post(
-        callback.callbackUrl,
+        webhook.url,
         JSON.parse(notification.payload),
         {
           headers: {
-            'X-Callback-Token': callback.callbackToken
+            'X-Callback-Token': webhook.token
           },
           timeout: 2000
         }
@@ -89,13 +89,13 @@ export class NotificationService {
 
   async retrySendNotification(notificationId: number) {
     const notification = await this.notificationRepository.findOne(notificationId)
-    const callback = await this.callbackRepository.findOne(notification.callbackId)
+    const webhook = await this.webhookRepository.findOne(notification.webhookId)
     this.updateNotification(notification.id, {
       tries: notification.tries + 1
     })
     this.sendNotification(
       notification,
-      callback
+      webhook
     )
   }
 }

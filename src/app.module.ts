@@ -2,19 +2,19 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // controllers
-import { CallbackController } from './controllers/callback.controller';
+import { WebhookController } from './controllers/webhook.controller';
 import { NotificationController } from './controllers/notification.controller';
 
 // services
-import { CallbackService } from './services/callback.service';
+import { WebhookService } from './services/webhook.service';
 import { NotificationService } from './services/notification.service';
 import { SqsService } from './services/sqs.service';
 import { IngestorService } from './services/ingestor.service';
 
 // entities
 import { Notification } from './entities/notification.entity'
-import { Callback } from './entities/callback.entity'
-import { Payload } from './entities/payload.entity'
+import { Webhook } from './entities/webhook.entity'
+import { TestPayload } from './entities/test-payload.entity'
 
 @Module({
   imports: [
@@ -27,23 +27,23 @@ import { Payload } from './entities/payload.entity'
       database: 'xendit',
       entities: [
         Notification,
-        Callback,
-        Payload
+        Webhook,
+        TestPayload
       ],
       synchronize: true,
     }),
     TypeOrmModule.forFeature([
       Notification,
-      Callback,
-      Payload
+      Webhook,
+      TestPayload
     ])
   ],
   controllers: [
-    CallbackController,
+    WebhookController,
     NotificationController
   ],
   providers: [
-    CallbackService,
+    WebhookService,
     NotificationService,
     SqsService,
     IngestorService

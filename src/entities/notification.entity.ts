@@ -14,7 +14,7 @@ export class Notification {
   id: number;
 
   @Column()
-  callbackId: number;
+  webhookId: number;
 
   @Column()
   paymentId: number;

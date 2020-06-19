@@ -1,12 +1,12 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Callback {
+export class Webhook {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  callbackUrl: string;
+  url: string;
 
   @Column()
   type: string;
@@ -15,5 +15,5 @@ export class Callback {
   accountId: number;
 
   @Column()
-  callbackToken: string;
+  token: string;
 }
