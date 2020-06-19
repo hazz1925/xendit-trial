@@ -1,36 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CallbackService } from './callback.service';
+import { WebhookService } from './webhook.service';
 
-describe('CallbackService', () => {
-  let callbackService: CallbackService;
-  const callbackRepoMock = {
+describe('WebhookService', () => {
+  let webhookService: WebhookService;
+  const webhookRepoMock = {
     save: jest.fn(),
   }
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       providers: [
-        CallbackService,
+        WebhookService,
         {
-          provide: 'CallbackRepository',
-          useValue: callbackRepoMock
+          provide: 'WebhookRepository',
+          useValue: webhookRepoMock
         },
       ],
     }).compile();
 
-    callbackService = app.get<CallbackService>(CallbackService);
+    webhookService = app.get<WebhookService>(WebhookService);
   });
 
-  describe('create callback', () => {
-    it('should create callback successfully', async () => {
-      const res = await callbackService.createCallback({
-        callbackUrl: 'someurl',
+  describe('create webhook', () => {
+    it('should create webhook successfully', async () => {
+      const res = await webhookService.createWebhook({
+        url: 'someurl',
         type: 'PAID',
         accountId: 123
       })
 
-      expect(callbackRepoMock.save).toHaveBeenCalled();
-      expect(res).toBe(callbackRepoMock.save.mock.calls[0][0].callbackToken)
+      expect(webhookRepoMock.save).toHaveBeenCalled();
+      expect(res).toBe(webhookRepoMock.save.mock.calls[0][0].token)
     });
   });
 });

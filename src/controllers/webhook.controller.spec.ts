@@ -1,22 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CallbackController } from './callback.controller';
-import { CallbackService } from './callback.service';
+import { WebhookController } from './webhook.controller';
+import { WebhookService } from '../services/webhook.service';
 
-describe('AppController', () => {
-  let appController: AppController;
+describe.skip('WebhookController', () => {
+  let webhookController: WebhookController;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
+      controllers: [WebhookController],
+      providers: [WebhookService],
     }).compile();
 
-    appController = app.get<AppController>(AppController);
+    webhookController = app.get<WebhookController>(WebhookController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('create', () => {
+    it('should create new webhook', () => {
     });
   });
 });
