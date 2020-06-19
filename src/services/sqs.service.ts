@@ -21,10 +21,18 @@ export class SqsService {
         MessageBody: JSON.stringify(payload),
         QueueUrl: this.queueUrl
       }).promise()
-      console.log(res)
     } catch(error) {
       console.error(error)
       throw new Error('Sending message to SQS failed.')
     }
+  }
+
+  async receiveMessage() {
+    return this.sqs.receiveMessage({
+      QueueUrl: this.queueUrl,
+      MaxNumberOfMessages: 10,
+      WaitTimeSeconds: 5,
+      VisibilityTimeout: 300
+    }).promise()
   }
 }

@@ -39,35 +39,39 @@ export class NotificationService {
       })
 
       const sent = await this.sendNotification(
-        callback.callbackUrl,
-        notifyDto.payload,
-        callback.callbackToken
+        notification,
+        callback
       )
-      if (sent) {
-        this.updateNotificationStatus(notification.id, NotificationService.ACKNOWLEDGED)
-      } else {
-        this.pushToRetryQueue(notification.id)
-      }
     } catch(error) {
       throw new InternalServerErrorException(error.message)
     }
   }
 
   private async sendNotification(
-    callbackUrl: string,
-    payload: object,
-    callbackToken: string
-  ): Promise<boolean> {
+    notification: Notification,
+    callback: Callback
+  ) {
     try {
-      const res = await axios.post(callbackUrl, payload, {
-        headers: {
-          'X-Callback-Token': callbackToken
-        },
-        timeout: 2000
-      })
-      return res.status === 200
+      const res = await axios.post(
+        callback.callbackUrl,
+        JSON.parse(notification.payload),
+        {
+          headers: {
+            'X-Callback-Token': callback.callbackToken
+          },
+          timeout: 2000
+        }
+      )
+
+      if (res.status === 200) {
+        this.updateNotification(notification.id, {
+          status: NotificationService.ACKNOWLEDGED
+        })
+      } else {
+        this.pushToRetryQueue(notification.id)
+      }
     } catch(error) {
-      return false
+      this.pushToRetryQueue(notification.id)
     }
   }
 
@@ -79,9 +83,19 @@ export class NotificationService {
     }, NotificationService.FIFTEEN_MINS)
   }
 
-  async updateNotificationStatus(id: number, status: string) {
-    this.notificationRepository.update(id, {
-      status
+  async updateNotification(id: number, partialNotification: Partial<Notification>) {
+    this.notificationRepository.update(id, partialNotification)
+  }
+
+  async retrySendNotification(notificationId: number) {
+    const notification = await this.notificationRepository.findOne(notificationId)
+    const callback = await this.callbackRepository.findOne(notification.callbackId)
+    this.updateNotification(notification.id, {
+      tries: notification.tries + 1
     })
+    this.sendNotification(
+      notification,
+      callback
+    )
   }
 }
